@@ -80,7 +80,6 @@ function renderTodos() {
     const todoDiv = document.createElement("div");
     todoDiv.classList.add("todo");
 
-
     // Create a new list item
     const newTodo = document.createElement("li");
     newTodo.classList.add("todo-item");
@@ -125,12 +124,11 @@ function manipulateTodo(e) {
     } else {
       // Mark it as completed
       const task = todoDiv.innerText;
-      updateTodoStatus(task,"Completed");
+      updateTodoStatus(task, "Completed");
       todoDiv.classList.add("completed");
     }
-
   }
-  
+
   if (target.classList.contains("trash-btn")) {
     const todoDiv = target.parentElement;
     todoDiv.classList.add("fall");
@@ -141,53 +139,97 @@ function manipulateTodo(e) {
 
     const task = todoDiv.innerText;
     deleteTodo(task);
-
   }
+
+  if (target.classList.contains("edit-btn")) {
+    const todoDiv = target.parentElement;
+    const todoText = todoDiv.innerText;
+
+    const editInput = document.createElement("input");
+    editInput.type = "text";
+    editInput.value = todoText;
+    editInput.classList.add("edit-input");
+
+    todoDiv.querySelector(".todo-item").replaceWith(editInput);
+
+    const saveButton = document.createElement("button");
+    saveButton.classList.add("save-btn");
+    saveButton.innerHTML = '<i class="fa-solid fa-floppy-disk"></i>';
+    todoDiv.querySelector(".edit-btn").replacewith(saveButton);
+    console.log(todoDiv);
+  }
+
+  const saveTask = () => {
+    const newTodoText = editInput.value.trim();
+    if (newTodoText !== ""){
+      updateTodo(todoText, newTodoText);
+
+      const listItem = document.createElement("li");
+      listItem.classList.add("todo-item");
+      listItem.textContent = newTodoText;
+      todoDiv.querySelector(".edit-input").replaceWith(listItem);
+
+      const editButton = document.createElement("button");
+      editButton.classList.add("edit-btn");
+      editButton.innerHTML = `<i class="fa-solid fa-pen-to-square"></i>`;
+      todoDiv.querySelector(".save-btn").replaceWith(editButton);
+    }
+  };
+  saveButton.addEventListener("click", saveTask);
 }
 
-function updateTodoStatus(todo, newStatus ){
+function updateTodoStatus(oldtodo, newStatus) {
   const todosArray = getTodosFromLocalStorage();
   const todoObject = todosArray.find((todoObject) => {
-    return todoObject.todo == todo
+    return todoObject.todo == oldtodo;
   });
   todoObject.status = newStatus;
   localStorage.setItem("todos", JSON.stringify(todosArray));
 }
 
-function deleteTodo(todo){
-const todosArray =  getTodosFromLocalStorage();
-const todoObjectIndex = todosArray.findIndex((todoObject) => {
-  return todoObject.todo === todo;
-});
-todosArray.splice(todoObjectIndex, 1);
-localStorage.setItem("todos", JSON.stringify(todosArray));
+function deleteTodo(todo) {
+  const todosArray = getTodosFromLocalStorage();
+  const todoObjectIndex = todosArray.findIndex((todoObject) => {
+    return todoObject.todo === todo;
+  });
+  todosArray.splice(todoObjectIndex, 1);
+  localStorage.setItem("todos", JSON.stringify(todosArray));
 }
 
-function filterTodos(e){
+function updateTodo(todo, newTodo){
+  const todosArray = getTodosFromLocalStorage();
+  const todoObject = todosArray.find((todoObject) => {
+    todoObject.todo === todo;
+  });
+  todoObject.todo = newTodo;
+  localStorage.setItem("todos", JSON.stringify(todosArray));
+}
+
+
+function filterTodos(e) {
   const filterValue = e.target.value;
   console.log("Filter:", filterValue);
   const todos = todoList.childNodes;
   console.log("Todos:", todos);
 
   todos.forEach((todoDiv) => {
-    switch(filterValue){
+    switch (filterValue) {
       case "all":
         todoDiv.style.display = "flex";
         break;
       case "completed":
-        if (todoDiv.classList.contains("completed")){
+        if (todoDiv.classList.contains("completed")) {
           todoDiv.style.display = "flex";
         } else {
           todoDiv.style.display = "none";
         }
-        break
+        break;
       case "uncompleted":
-        if (!todoDiv.classList.contains("completed")){
-        todoDiv.style.display = "flex";
+        if (!todoDiv.classList.contains("completed")) {
+          todoDiv.style.display = "flex";
         } else {
-        todoDiv.style.display = "none";
+          todoDiv.style.display = "none";
         }
     }
-
   });
 }
